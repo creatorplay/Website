@@ -1,0 +1,73 @@
+<script>
+const form = document.getElementById('leadForm');
+const apiBaseUrl = 'https://jet.b2bsoft.site/api';
+const vendorUid = '0f759710-6ff6-44f9-bfbd-988fd8ff0c62';
+const accessToken = 'uoAxK1HmDoyNFsZdAgRSWVLX55lyNUIstfuatu28wRhCPgZHfFbaOXv67XbzAxjA';
+
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('fullName').value,
+        phone: document.getElementById('whatsapp').value,
+        email: document.getElementById('email').value,
+        service: document.getElementById('service').value,
+        message: document.getElementById('message').value
+    };
+
+    // Validation
+    if(Object.values(formData).some(field => field.trim() === '')) {
+        alert('सभी फ़ील्ड आवश्यक हैं! | All fields are required!');
+        return;
+    }
+
+    const whatsappMessage = `
+    नमस्ते *${formData.name}*,
+
+    हमें आपका संदेश मिल गया है! 🎉
+    
+    ▫️ नाम: ${formData.name}
+    ▫️ फ़ोन: ${formData.phone}
+    ▫️ ईमेल: ${formData.email}
+    ▫️ सेवा: ${formData.service}
+    ▫️ संदेश: ${formData.message}
+    
+    हम जल्द ही आपसे संपर्क करेंगे! 🙏
+    `;
+
+    const payload = {
+        phone_number: formData.phone,
+        message_body: whatsappMessage,
+        contact: {
+            first_name: formData.name.split(' ')[0],
+            last_name: formData.name.split(' ')[1] || '',
+            email: formData.email,
+            country: "IN",
+            language_code: "hi",
+            groups: "New Leads"
+        }
+    };
+
+    fetch(`${apiBaseUrl}/${vendorUid}/contact/send-message`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'API Error');
+        return data;
+    })
+    .then(data => {
+        alert('हमें आपका संदेश मिल गया है! व्हाट्सएप्प चेक करें ✅');
+        form.reset();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(`संदेश भेजने में त्रुटि: ${error.message}`);
+    });
+});
+                      </script>
